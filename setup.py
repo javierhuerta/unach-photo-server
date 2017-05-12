@@ -56,7 +56,7 @@ setup(
         'unach_photo_server',
     ],
     include_package_data=True,
-    install_requires=["django-model-utils>=2.0",],
+    install_requires=["django-model-utils>=2.0", "MySQL-python>=1.2.5", "pysmb>=1.1.19"],
     license="MIT",
     zip_safe=False,
     keywords='unach-photo-server',
