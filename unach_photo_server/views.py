@@ -1,64 +1,156 @@
 # -*- coding: utf-8 -*-
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    DetailView,
-    UpdateView,
-    ListView
-)
+from __future__ import unicode_literals
 
-from .models import (
-	DjangoProject,
-	ProductionConfDjangoProject,
-)
+from django.conf import settings
+from django.shortcuts import render
+from jsonview.decorators import json_view
+from .models import PhotoRepository, AppRegister
 
 
-class DjangoProjectCreateView(CreateView):
-
-    model = DjangoProject
-
-
-class DjangoProjectDeleteView(DeleteView):
-
-    model = DjangoProject
+def home_test(request):
+    return render(request, 'unach_photo_server/home_test.html')
 
 
-class DjangoProjectDetailView(DetailView):
+@json_view
+def get_photo_by_name(request):
 
-    model = DjangoProject
+    all_repos = PhotoRepository.objects.filter(
+        active=True
+    )
+
+    if request.is_ajax():
+        photo_name = request.GET.get('photo_name', None)
+        refresh = request.GET.get('refresh', False)
+        token = request.GET.get('token', None)
+
+        '''
+            Si photo_name y token existen en la solicitud
+        '''
+        if photo_name and token:
+            '''
+                Si token es registrado en alguna app y activo
+            '''
+            if AppRegister.objects.filter(token__iexact=token, active=True).exists():
+
+                '''
+                    Excluir solicitudes de dominios no conocidos
+                '''
+                can_reply = False
+
+                if not settings.DEBUG:
+                    '''
+                        Si estamos en modo produccion entonces
+                        solo se aceptan solicitudes de dominios conocidos.
+                    '''
+                    if AppRegister.objects.filter(
+                            token__iexact=token,
+                            active=True,
+                            domain_name__icontains=request.get_host()).exists():
+                        can_reply = True
+
+                else:
+                    '''
+                        Si estamos en modo DEBUG aceptamos solicitudes
+                        de cualquier dominio.
+                    '''
+                    can_reply = True
+
+                if can_reply:
+                    if PhotoRepository.is_rut(photo_name):
+
+                        data_info = PhotoRepository.search_photo_by_name(
+                            all_repos,
+                            photo_name,
+                            refresh
+                        )
+
+                        return data_info
+                    else:
+                        return {
+                            'error': 'Formato de nombre no permitido',
+                            'success': False
+                        }
+
+            else:
+                return {
+                    'error': 'No tiene permisos',
+                    'success': False
+                }
+
+    return {
+        'error': 'Solicitud no permitida',
+        'success': False
+    }
 
 
-class DjangoProjectUpdateView(UpdateView):
+@json_view
+def get_photo_blob(request):
 
-    model = DjangoProject
+    all_repos = PhotoRepository.objects.filter(
+        repo_type='database',
+        is_blob=True,
+        active=True
+    )
 
+    if request.is_ajax():
+        photo_name = request.GET.get('photo_name', None)
+        token = request.GET.get('token', None)
 
-class DjangoProjectListView(ListView):
+        '''
+            Si photo_name y token existen en la solicitud
+        '''
+        if photo_name and token:
+            '''
+                Si token es registrado en alguna app y activo
+            '''
+            if AppRegister.objects.filter(token__iexact=token, active=True).exists():
 
-    model = DjangoProject
+                '''
+                    Excluir solicitudes de dominios no conocidos
+                '''
+                can_reply = False
 
+                if not settings.DEBUG:
+                    '''
+                        Si estamos en modo produccion entonces
+                        solo se aceptan solicitudes de dominios conocidos.
+                    '''
+                    if AppRegister.objects.filter(
+                            token__iexact=token,
+                            active=True,
+                            domain_name__icontains=request.get_host()).exists():
+                        can_reply = True
 
-class ProductionConfDjangoProjectCreateView(CreateView):
+                else:
+                    '''
+                        Si estamos en modo DEBUG aceptamos solicitudes
+                        de cualquier dominio.
+                    '''
+                    can_reply = True
 
-    model = ProductionConfDjangoProject
+                if can_reply:
+                    if PhotoRepository.is_rut(photo_name):
 
+                        data_info = PhotoRepository.search_photo_by_name(
+                            all_repos,
+                            photo_name,
+                            refresh=True
+                        )
 
-class ProductionConfDjangoProjectDeleteView(DeleteView):
+                        return data_info
+                    else:
+                        return {
+                            'error': 'Formato de nombre no permitido',
+                            'success': False
+                        }
 
-    model = ProductionConfDjangoProject
+            else:
+                return {
+                    'error': 'No tiene permisos',
+                    'success': False
+                }
 
-
-class ProductionConfDjangoProjectDetailView(DetailView):
-
-    model = ProductionConfDjangoProject
-
-
-class ProductionConfDjangoProjectUpdateView(UpdateView):
-
-    model = ProductionConfDjangoProject
-
-
-class ProductionConfDjangoProjectListView(ListView):
-
-    model = ProductionConfDjangoProject
-
+    return {
+        'error': 'Solicitud no permitida',
+        'success': False
+    }
