@@ -253,6 +253,14 @@ class PhotoRepository(models.Model):
                             path
                         )
 
+                        '''
+                            set permissions
+                        '''
+                        os.chmod(
+                            path, 
+                            0660
+                        )
+
                         data_info['path'] = path
                         data_info['url'] = '{0}{1}{2}{3}'.format(
                             settings.VALID_HOST,
