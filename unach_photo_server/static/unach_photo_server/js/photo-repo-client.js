@@ -8,9 +8,9 @@ $(function() {
     $.ajax(
         {
             type: "get",
-            url: "/pictures/",
+            url: "/pictures/photo/blob/",
             data: {
-                'photo_name': '179885115',
+                'photo_name': '184834294',
                 'token': '8b2a8e46e40279606bd227990ce6ce33de96d8ff',
                 'refresh': true
             }

@@ -50,7 +50,7 @@ def get_photo_by_name(request):
 
                 else:
                     '''
-                        Si estamos en modo DEBUG aceptamos solicitudes
+                        Si estamos en modo DEBUG aceptamos solicitudes 
                         de cualquier dominio.
                     '''
                     can_reply = True
@@ -123,7 +123,7 @@ def get_photo_blob(request):
 
                 else:
                     '''
-                        Si estamos en modo DEBUG aceptamos solicitudes
+                        Si estamos en modo DEBUG aceptamos solicitudes 
                         de cualquier dominio.
                     '''
                     can_reply = True

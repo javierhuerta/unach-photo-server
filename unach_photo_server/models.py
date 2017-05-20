@@ -231,7 +231,7 @@ class PhotoRepository(models.Model):
             if conn.connect(ip=repo.server_ip, port=139):
                 try:
                     file_obj = tempfile.NamedTemporaryFile()
-                    file_attributes, filesize = conn.retrieveFile(
+                    file_attributes, file_size = conn.retrieveFile(
                         repo.service_name,
                         '{0}{1}'.format(
                             repo.path,
@@ -263,14 +263,17 @@ class PhotoRepository(models.Model):
                         data_info['type'] = path.split('.')[-1]
                         data_info['success'] = True
 
-
                         return data_info
 
                     file_obj.close()
+                    conn.close()
                 except Exception as e:
                     print e
+                    print "Operacion fallida"
+                    conn.close()
         except Exception as e:
             print e
+            conn.close()
 
         return data_info
 
@@ -286,6 +289,7 @@ class PhotoRepository(models.Model):
         if repo.repo_type == 'database':
 
             if repo.engine == 'mysql':
+                print "mysql"
                 '''
                     Mysql connection
                 '''
@@ -361,6 +365,7 @@ class PhotoRepository(models.Model):
             '''
 
             if os.path.exists(path):
+                print "existe ruta"
                 data_info['path'] = path
                 data_info['url'] = '{0}{1}{2}{3}'.format(
                     settings.VALID_HOST,
@@ -372,6 +377,8 @@ class PhotoRepository(models.Model):
                 data_info['success'] = True
 
                 break
+            else:
+                print "no se pudo encontrar ruta"
 
         return data_info
 
